@@ -147,6 +147,8 @@ function ColumnsEditContainer( {
 							) }
 						</>
 					) }
+					{ /** DOUBLEEDESIGN CUSTOM: Remove "stack on mobile" toggle because I'm handling that at the template level */ }
+					{ /* }
 					<ToggleControl
 						__nextHasNoMarginBottom
 						label={ __( 'Stack on mobile' ) }
@@ -156,7 +158,7 @@ function ColumnsEditContainer( {
 								isStackedOnMobile: ! isStackedOnMobile,
 							} )
 						}
-					/>
+					/> */ }
 				</PanelBody>
 			</InspectorControls>
 			<div { ...innerBlocksProps } />

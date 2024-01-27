@@ -230,16 +230,19 @@ function MediaTextEdit( { attributes, isSelected, setAttributes } ) {
 
 	const mediaTextGeneralSettings = (
 		<PanelBody title={ __( 'Settings' ) }>
-			<ToggleControl
-				__nextHasNoMarginBottom
-				label={ __( 'Stack on mobile' ) }
-				checked={ isStackedOnMobile }
-				onChange={ () =>
-					setAttributes( {
-						isStackedOnMobile: ! isStackedOnMobile,
-					} )
-				}
-			/>
+			{ /** DOUBLEEDESIGN CUSTOM: Remove "stack on mobile" toggle because I'm handling that at the template level */ }
+			{ /**
+					  <ToggleControl
+					  __nextHasNoMarginBottom
+					  label={ __( 'Stack on mobile' ) }
+					  checked={ isStackedOnMobile }
+					  onChange={ () =>
+					  setAttributes( {
+					  isStackedOnMobile: ! isStackedOnMobile,
+					  } )
+					  }
+					  />
+					 */ }
 			{ mediaType === 'image' && (
 				<ToggleControl
 					__nextHasNoMarginBottom

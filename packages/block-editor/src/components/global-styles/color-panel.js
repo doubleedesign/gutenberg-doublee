@@ -373,6 +373,23 @@ export default function ColorPanel( {
 		onChange( newValue );
 	};
 
+	/** DOUBLEEDESIGN CUSTOM: Treat the button panel similarly to the background or link panels */
+	// Button
+	const showButtonPanel = useHasButtonPanel( settings );
+	const hasButtonColor = () => !! value?.color?.button;
+	const buttonColor = decodeValue( inheritedValue?.color?.button );
+	const userButtonColor = decodeValue( value?.color?.button );
+	const setButtonColor = ( newColor ) => {
+		onChange(
+			setImmutably(
+				value,
+				[ 'color', 'button' ],
+				encodeColorValue( newColor )
+			)
+		);
+	};
+	const resetButtonColor = () => setButtonColor( 'primary' );
+
 	// Links
 	const showLinkPanel = useHasLinkPanel( settings );
 	const linkColor = decodeValue(
@@ -381,11 +398,9 @@ export default function ColorPanel( {
 	const userLinkColor = decodeValue( value?.elements?.link?.color?.text );
 	const setLinkColor = ( newColor ) => {
 		onChange(
-			setImmutably(
-				value,
-				[ 'elements', 'link', 'color', 'text' ],
-				encodeColorValue( newColor )
-			)
+			value,
+			[ 'elements', 'link', 'color', 'text' ],
+			setImmutably( encodeColorValue( newColor ) )
 		);
 	};
 	const hoverLinkColor = decodeValue(
@@ -448,11 +463,7 @@ export default function ColorPanel( {
 			label: __( 'Captions' ),
 			showPanel: useHasCaptionPanel( settings ),
 		},
-		{
-			name: 'button',
-			label: __( 'Button' ),
-			showPanel: useHasButtonPanel( settings ),
-		},
+		/** DOUBLEEDESIGN CUSTOM: Button removed from here and shown by default instead */
 		{
 			name: 'heading',
 			label: __( 'Heading' ),
@@ -559,6 +570,24 @@ export default function ColorPanel( {
 				},
 			].filter( Boolean ),
 		},
+		/** DOUBLEEDESIGN CUSTOM: Show button colour panel here */
+		showButtonPanel && {
+			key: 'button',
+			label: __( 'Button color' ),
+			hasValue: hasButtonColor,
+			resetValue: resetButtonColor,
+			isShownByDefault: showButtonPanel,
+			indicators: [ buttonColor ],
+			tabs: [
+				{
+					key: 'button',
+					label: __( 'Button' ),
+					inheritedValue: buttonColor,
+					setValue: setButtonColor,
+					userValue: userButtonColor,
+				},
+			],
+		},
 		showLinkPanel && {
 			key: 'link',
 			label: __( 'Link' ),
@@ -586,7 +615,9 @@ export default function ColorPanel( {
 	].filter( Boolean );
 
 	elements.forEach( ( { name, label, showPanel } ) => {
-		if ( ! showPanel ) return;
+		if ( ! showPanel ) {
+			return;
+		}
 
 		const elementBackgroundColor = decodeValue(
 			inheritedValue?.elements?.[ name ]?.color?.background

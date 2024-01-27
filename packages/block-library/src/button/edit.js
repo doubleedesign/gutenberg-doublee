@@ -347,12 +347,15 @@ function ButtonEdit( props ) {
 					/>
 				</Popover>
 			) }
-			<InspectorControls>
-				<WidthPanel
-					selectedWidth={ width }
-					setAttributes={ setAttributes }
-				/>
-			</InspectorControls>
+			{ /** DOUBLEEDESIGN CUSTOM: Do not show width options */ }
+			{ /**
+					  <InspectorControls>
+					  <WidthPanel
+					  selectedWidth={ width }
+					  setAttributes={ setAttributes }
+					  />
+					  </InspectorControls>
+					 */ }
 			<InspectorControls group="advanced">
 				{ isLinkTag && (
 					<TextControl

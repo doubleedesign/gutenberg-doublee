@@ -235,7 +235,9 @@ const AnimatedContainer = ( {
 
 const BlockInspectorSingleBlock = ( { clientId, blockName } ) => {
 	const availableTabs = useInspectorControlsTabs( blockName );
-	const showTabs = availableTabs?.length > 1;
+	//const showTabs = availableTabs?.length > 1;
+	// DOUBLEEDESIGN CUSTOM: Do not use tabs
+	const showTabs = false;
 
 	const hasBlockStyles = useSelect(
 		( select ) => {
@@ -281,13 +283,14 @@ const BlockInspectorSingleBlock = ( { clientId, blockName } ) => {
 							</PanelBody>
 						</div>
 					) }
-					<InspectorControls.Slot />
-					<InspectorControls.Slot group="list" />
+					{ /** DOUBLEEDESIGN CUSTOM: Reorder sections so color is directly under styles*/ }
 					<InspectorControls.Slot
 						group="color"
 						label={ __( 'Color' ) }
 						className="color-block-support-panel__inner-wrapper"
 					/>
+					<InspectorControls.Slot />
+					<InspectorControls.Slot group="list" />
 					<InspectorControls.Slot
 						group="typography"
 						label={ __( 'Typography' ) }
