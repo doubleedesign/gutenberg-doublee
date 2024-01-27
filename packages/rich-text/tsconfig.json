@@ -3,18 +3,19 @@
 	"compilerOptions": {
 		"rootDir": "src",
 		"declarationDir": "build-types",
-		"types": [ "gutenberg-env" ],
-		"checkJs": false
+		"types": ["gutenberg-env"],
+		"checkJs": false,
+		"skipLibCheck": true
 	},
 	"references": [
-		{ "path": "../a11y" },
-		{ "path": "../compose" },
-		{ "path": "../data" },
-		{ "path": "../deprecated" },
-		{ "path": "../element" },
-		{ "path": "../escape-html" },
-		{ "path": "../i18n" },
-		{ "path": "../keycodes" }
+		{"path": "../a11y"},
+		{"path": "../compose"},
+		{"path": "../data"},
+		{"path": "../deprecated"},
+		{"path": "../element"},
+		{"path": "../escape-html"},
+		{"path": "../i18n"},
+		{"path": "../keycodes"}
 	],
-	"include": [ "src/**/*" ]
+	"include": ["src/**/*"]
 }

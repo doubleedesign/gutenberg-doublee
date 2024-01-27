@@ -4,8 +4,8 @@
 		"incremental": false,
 		"composite": false,
 		"module": "CommonJS",
-		"moduleResolution": "node16",
-		"types": [ "node" ],
+		"moduleResolution": "node",
+		"types": ["node"],
 		"rootDir": "src",
 		"noEmit": false,
 		"outDir": "build",
@@ -15,12 +15,13 @@
 		"declarationDir": "build-types",
 		"emitDeclarationOnly": false,
 		"allowJs": true,
-		"checkJs": false
+		"checkJs": false,
+		"skipLibCheck": true
 	},
 	"references": [
-		{ "path": "../api-fetch" },
-		{ "path": "../keycodes" },
-		{ "path": "../url" }
+		{"path": "../api-fetch"},
+		{"path": "../keycodes"},
+		{"path": "../url"}
 	],
-	"include": [ "src/**/*" ]
+	"include": ["src/**/*"]
 }

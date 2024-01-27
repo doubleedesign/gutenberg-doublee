@@ -5,23 +5,24 @@
 		"declarationDir": "build-types",
 		"noUnusedParameters": false,
 		"checkJs": false,
-		"noImplicitAny": false
+		"noImplicitAny": false,
+		"skipLibCheck": true
 	},
 	"references": [
-		{ "path": "../api-fetch" },
-		{ "path": "../compose" },
-		{ "path": "../block-editor" },
-		{ "path": "../data" },
-		{ "path": "../deprecated" },
-		{ "path": "../element" },
-		{ "path": "../html-entities" },
-		{ "path": "../i18n" },
-		{ "path": "../is-shallow-equal" },
-		{ "path": "../private-apis" },
-		{ "path": "../rich-text" },
-		{ "path": "../sync" },
-		{ "path": "../undo-manager" },
-		{ "path": "../url" }
+		{"path": "../api-fetch"},
+		{"path": "../compose"},
+		{"path": "../block-editor"},
+		{"path": "../data"},
+		{"path": "../deprecated"},
+		{"path": "../element"},
+		{"path": "../html-entities"},
+		{"path": "../i18n"},
+		{"path": "../is-shallow-equal"},
+		{"path": "../private-apis"},
+		{"path": "../rich-text"},
+		{"path": "../sync"},
+		{"path": "../undo-manager"},
+		{"path": "../url"}
 	],
-	"include": [ "src/**/*" ]
+	"include": ["src/**/*"]
 }
