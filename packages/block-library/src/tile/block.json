@@ -1,0 +1,34 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "custom/tile",
+	"title": "Tile",
+	"category": "design",
+	"parent": ["custom/tiles"],
+	"description": "A single tile within a tiles block.",
+	"textdomain": "default",
+	"attributes": {
+		"allowedBlocks": {
+			"type": "array"
+		},
+		"templateLock": {
+			"type": ["string", "boolean"],
+			"enum": ["all", "insert", "contentOnly", false]
+		}
+	},
+	"supports": {
+		"__experimentalOnEnter": true,
+		"anchor": true,
+		"reusable": false,
+		"html": false,
+		"color": {
+			"background": true,
+			"gradient": true,
+			"text": false,
+			"link": false,
+			"__experimentalDefaultControls": {
+				"background": true
+			}
+		}
+	}
+}

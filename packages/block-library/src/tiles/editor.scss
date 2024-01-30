@@ -1,0 +1,37 @@
+// This max-width is used to constrain the main editor column, it should not
+// cascade into columns.
+// We use :where to provide minimum specificity, so that intentional margins,
+// such as those of navigation menu items, override and win on specificity.
+.wp-block-tiles :where(.wp-block) {
+	margin-left: 0;
+	margin-right: 0;
+}
+
+// Individual columns do not have top and bottom margins on the frontend.
+// So we make the editor match that.
+// We use :where to provide minimum specificity, so that intentional margins,
+// such as those configured in theme.json, override and win on specificity.
+html :where(.wp-block-tiles) {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.wp-block-tiles {
+	display: grid;
+
+	@for $i from 1 through 4 {
+		&[data-ideal-row-count="#{$i}"] {
+			grid-template-rows: repeat(#{$i}, 1fr);
+		}
+	}
+
+	@for $i from 1 through 6 {
+		&[data-ideal-col-count="#{$i}"] {
+			grid-template-columns: repeat(#{$i}, 1fr);
+		}
+
+		.wp-block-heading {
+			grid-column: span #{$i};
+		}
+	}
+}

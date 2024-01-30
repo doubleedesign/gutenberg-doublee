@@ -118,6 +118,8 @@ import * as tagCloud from './tag-cloud';
 import * as templatePart from './template-part';
 import * as termDescription from './term-description';
 import * as textColumns from './text-columns';
+import * as tiles from './tiles';
+import * as tile from './tile';
 import * as verse from './verse';
 import * as video from './video';
 import * as footnotes from './footnotes';
@@ -178,6 +180,9 @@ const getAllBlocks = () => {
 		table,
 		tagCloud,
 		textColumns,
+		/** DOUBLEEDESIGN CUSTOM: Tiles block and its inner Tile block */
+		tiles,
+		tile,
 		verse,
 		video,
 		footnotes,

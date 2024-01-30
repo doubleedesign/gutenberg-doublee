@@ -1,0 +1,34 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "custom/tiles",
+	"title": "Tiles",
+	"category": "design",
+	"description": "Display small pieces of related content in a tight group.",
+	"textdomain": "default",
+	"attributes": {
+		"templateLock": {
+			"type": ["string", "boolean"],
+			"enum": ["all", "insert", "contentOnly", false]
+		},
+		"rowCount": {
+			"type": "number",
+			"default": 1
+		}
+	},
+	"supports": {
+		"anchor": true,
+		"align": false,
+		"html": false,
+		"layout": {
+			"allowSwitching": false,
+			"allowInheriting": false,
+			"allowEditing": false
+		},
+		"color": {
+			"background": true
+		}
+	},
+	"editorStyle": "wp-block-columns-editor",
+	"style": "wp-block-columns"
+}
