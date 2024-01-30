@@ -5,7 +5,7 @@
  * Description: Customised version of the WordPress block editor for Double-E Design client websites.
  * Requires at least: 6.3
  * Requires PHP: 7.0
- * Version: 17.5.2
+ * Version: 17.5.3
  * Author: Gutenberg Team + Leesa Ward
  * Text Domain: gutenberg
  *
