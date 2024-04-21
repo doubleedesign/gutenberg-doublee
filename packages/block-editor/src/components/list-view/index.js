@@ -37,13 +37,18 @@ import ListViewDropIndicatorPreview from './drop-indicator';
 import useBlockSelection from './use-block-selection';
 import useListViewBlockIndexes from './use-list-view-block-indexes';
 import useListViewClientIds from './use-list-view-client-ids';
+import useListViewCollapseItems from './use-list-view-collapse-items';
 import useListViewDropZone from './use-list-view-drop-zone';
 import useListViewExpandSelectedItem from './use-list-view-expand-selected-item';
 import { store as blockEditorStore } from '../../store';
 import { BlockSettingsDropdown } from '../block-settings-menu/block-settings-dropdown';
 import { focusListItem } from './utils';
+import useClipboardHandler from './use-clipboard-handler';
 
 const expanded = ( state, action ) => {
+	if ( action.type === 'clear' ) {
+		return {};
+	}
 	if ( Array.isArray( action.clientIds ) ) {
 		return {
 			...state,
@@ -137,14 +142,6 @@ function ListViewComponent(
 
 	const [ expandedState, setExpandedState ] = useReducer( expanded, {} );
 
-	const { ref: dropZoneRef, target: blockDropTarget } = useListViewDropZone( {
-		dropZoneElement,
-		expandedState,
-		setExpandedState,
-	} );
-	const elementRef = useRef();
-	const treeGridRef = useMergeRefs( [ elementRef, dropZoneRef, ref ] );
-
 	const [ insertedBlock, setInsertedBlock ] = useState( null );
 
 	const { setSelectedTreeId } = useListViewExpandSelectedItem( {
@@ -166,11 +163,31 @@ function ListViewComponent(
 		},
 		[ setSelectedTreeId, updateBlockSelection, onSelect, getBlock ]
 	);
+
+	const { ref: dropZoneRef, target: blockDropTarget } = useListViewDropZone( {
+		dropZoneElement,
+		expandedState,
+		setExpandedState,
+	} );
+	const elementRef = useRef();
+
+	// Allow handling of copy, cut, and paste events.
+	const clipBoardRef = useClipboardHandler( {
+		selectBlock: selectEditorBlock,
+	} );
+
+	const treeGridRef = useMergeRefs( [
+		clipBoardRef,
+		elementRef,
+		dropZoneRef,
+		ref,
+	] );
+
 	useEffect( () => {
 		// If a blocks are already selected when the list view is initially
 		// mounted, shift focus to the first selected block.
 		if ( selectedClientIds?.length ) {
-			focusListItem( selectedClientIds[ 0 ], elementRef );
+			focusListItem( selectedClientIds[ 0 ], elementRef?.current );
 		}
 		// Disable reason: Only focus on the selected item when the list view is mounted.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,7 +198,10 @@ function ListViewComponent(
 			if ( ! clientId ) {
 				return;
 			}
-			setExpandedState( { type: 'expand', clientIds: [ clientId ] } );
+			const clientIds = Array.isArray( clientId )
+				? clientId
+				: [ clientId ];
+			setExpandedState( { type: 'expand', clientIds } );
 		},
 		[ setExpandedState ]
 	);
@@ -194,6 +214,9 @@ function ListViewComponent(
 		},
 		[ setExpandedState ]
 	);
+	const collapseAll = useCallback( () => {
+		setExpandedState( { type: 'clear' } );
+	}, [ setExpandedState ] );
 	const expandRow = useCallback(
 		( row ) => {
 			expand( row?.dataset?.block );
@@ -218,6 +241,11 @@ function ListViewComponent(
 		},
 		[ updateBlockSelection ]
 	);
+
+	useListViewCollapseItems( {
+		collapseAll,
+		expand,
+	} );
 
 	const firstDraggedBlockClientId = draggedClientIds?.[ 0 ];
 
@@ -269,6 +297,7 @@ function ListViewComponent(
 			expand,
 			firstDraggedBlockIndex,
 			collapse,
+			collapseAll,
 			BlockSettingsMenu,
 			listViewInstanceId: instanceId,
 			AdditionalBlockContent,
@@ -286,6 +315,7 @@ function ListViewComponent(
 			expand,
 			firstDraggedBlockIndex,
 			collapse,
+			collapseAll,
 			BlockSettingsMenu,
 			instanceId,
 			AdditionalBlockContent,
@@ -323,7 +353,7 @@ function ListViewComponent(
 		description && `block-editor-list-view-description-${ instanceId }`;
 
 	return (
-		<AsyncModeProvider value={ true }>
+		<AsyncModeProvider value>
 			<ListViewDropIndicatorPreview
 				draggedBlockClientId={ firstDraggedBlockClientId }
 				listViewRef={ elementRef }

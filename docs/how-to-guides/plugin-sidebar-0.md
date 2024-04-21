@@ -6,11 +6,11 @@ How to add a sidebar to your plugin. A sidebar is the region to the far right of
 
 ![Example sidebar](https://raw.githubusercontent.com/WordPress/gutenberg/HEAD/docs/assets/sidebar-up-and-running.png)
 
-_Note: this tutorial covers a custom sidebar, if you are looking to add controls to the sidebar see the [Block Toolbar and Settings Sidebar](/docs/how-to-guides/block-tutorial/block-controls-toolbar-and-sidebar.md)_
+_Note: this tutorial covers a custom sidebar, if you are looking to add controls to the sidebar see the [Block Toolbar and Settings Sidebar](/docs/getting-started/fundamentals/block-in-the-editor.md)_
 
 ## Before you start
 
-The tutorial assumes you have an existing plugin setup and are ready to add PHP and JavaScript code. Please, refer to [Getting started with JavaScript](/docs/how-to-guides/javascript/README.md) tutorial for an introduction to WordPress plugins and how to use JavaScript to extend the block editor.
+The tutorial assumes you have an existing plugin setup and are ready to add PHP and JavaScript code. Please, refer to [Getting started with JavaScript](/docs/getting-started/fundamentals/javascript-in-the-block-editor.md) tutorial for an introduction to WordPress plugins and how to use JavaScript to extend the block editor.
 
 ## Step-by-step guide
 

@@ -6,7 +6,7 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { Notice } from '@wordpress/components';
 import { useInstanceId, useViewportMatch } from '@wordpress/compose';
 import { store as preferencesStore } from '@wordpress/preferences';
@@ -14,7 +14,6 @@ import {
 	BlockBreadcrumb,
 	BlockToolbar,
 	store as blockEditorStore,
-	privateApis as blockEditorPrivateApis,
 	BlockInspector,
 } from '@wordpress/block-editor';
 import {
@@ -56,7 +55,6 @@ import SiteEditorCanvas from '../block-editor/site-editor-canvas';
 import TemplatePartConverter from '../template-part-converter';
 import { useSpecificEditorSettings } from '../block-editor/use-site-editor-settings';
 
-const { BlockRemovalWarningModal } = unlock( blockEditorPrivateApis );
 const {
 	ExperimentalEditorProvider: EditorProvider,
 	InserterSidebar,
@@ -74,19 +72,7 @@ const interfaceLabels = {
 	footer: __( 'Editor footer' ),
 };
 
-// Prevent accidental removal of certain blocks, asking the user for
-// confirmation.
-const blockRemovalRules = {
-	'core/query': __( 'Query Loop displays a list of posts or pages.' ),
-	'core/post-content': __(
-		'Post Content displays the content of a post or page.'
-	),
-	'core/post-template': __(
-		'Post Template displays each post or page in a Query Loop.'
-	),
-};
-
-export default function Editor( { isLoading } ) {
+export default function Editor( { isLoading, onClick } ) {
 	const {
 		record: editedPost,
 		getTitle,
@@ -102,23 +88,28 @@ export default function Editor( { isLoading } ) {
 		contextPost,
 		editorMode,
 		canvasMode,
-		renderingMode,
 		blockEditorMode,
 		isRightSidebarOpen,
 		isInserterOpen,
 		isListViewOpen,
+		isDistractionFree,
 		showIconLabels,
 		showBlockBreadcrumbs,
+		postTypeLabel,
 	} = useSelect( ( select ) => {
 		const { get } = select( preferencesStore );
-		const { getEditedPostContext, getEditorMode, getCanvasMode } = unlock(
+		const { getEditedPostContext, getCanvasMode } = unlock(
 			select( editSiteStore )
 		);
 		const { __unstableGetEditorMode } = select( blockEditorStore );
 		const { getActiveComplementaryArea } = select( interfaceStore );
 		const { getEntityRecord } = select( coreDataStore );
-		const { getRenderingMode, isInserterOpened, isListViewOpened } =
-			select( editorStore );
+		const {
+			isInserterOpened,
+			isListViewOpened,
+			getPostTypeLabel,
+			getEditorMode,
+		} = select( editorStore );
 		const _context = getEditedPostContext();
 
 		// The currently selected entity to display.
@@ -134,15 +125,16 @@ export default function Editor( { isLoading } ) {
 				: undefined,
 			editorMode: getEditorMode(),
 			canvasMode: getCanvasMode(),
-			renderingMode: getRenderingMode(),
 			blockEditorMode: __unstableGetEditorMode(),
 			isInserterOpen: isInserterOpened(),
 			isListViewOpen: isListViewOpened(),
 			isRightSidebarOpen: getActiveComplementaryArea(
 				editSiteStore.name
 			),
+			isDistractionFree: get( 'core', 'distractionFree' ),
 			showBlockBreadcrumbs: get( 'core', 'showBlockBreadcrumbs' ),
 			showIconLabels: get( 'core', 'showIconLabels' ),
+			postTypeLabel: getPostTypeLabel(),
 		};
 	}, [] );
 
@@ -150,6 +142,7 @@ export default function Editor( { isLoading } ) {
 	const isEditMode = canvasMode === 'edit';
 	const showVisualEditor = isViewMode || editorMode === 'visual';
 	const shouldShowBlockBreadcrumbs =
+		! isDistractionFree &&
 		showBlockBreadcrumbs &&
 		isEditMode &&
 		showVisualEditor &&
@@ -181,6 +174,8 @@ export default function Editor( { isLoading } ) {
 		'edit-site-editor__loading-progress'
 	);
 
+	const { closeGeneralSidebar } = useDispatch( editSiteStore );
+
 	const settings = useSpecificEditorSettings();
 	const isReady =
 		! isLoading &&
@@ -210,7 +205,7 @@ export default function Editor( { isLoading } ) {
 					<SidebarComplementaryAreaFills />
 					{ isEditMode && <StartTemplateOptions /> }
 					<InterfaceSkeleton
-						isDistractionFree={ true }
+						isDistractionFree={ isDistractionFree }
 						enableRegionNavigation={ false }
 						className={ classnames(
 							'edit-site-editor__interface-skeleton',
@@ -232,10 +227,7 @@ export default function Editor( { isLoading } ) {
 										{ ! isLargeViewport && (
 											<BlockToolbar hideDragHandle />
 										) }
-										<SiteEditorCanvas />
-										<BlockRemovalWarningModal
-											rules={ blockRemovalRules }
-										/>
+										<SiteEditorCanvas onClick={ onClick } />
 										<PatternModal />
 									</>
 								) }
@@ -253,26 +245,26 @@ export default function Editor( { isLoading } ) {
 						}
 						secondarySidebar={
 							isEditMode &&
-							( ( shouldShowInserter && <InserterSidebar /> ) ||
+							( ( shouldShowInserter && (
+								<InserterSidebar
+									closeGeneralSidebar={ closeGeneralSidebar }
+									isRightSidebarOpen={ isRightSidebarOpen }
+								/>
+							) ) ||
 								( shouldShowListView && <ListViewSidebar /> ) )
 						}
 						sidebar={
+							! isDistractionFree &&
 							isEditMode &&
-							isRightSidebarOpen && (
-								<>
-									<ComplementaryArea.Slot scope="core/edit-site" />
-								</>
+							isRightSidebarOpen &&
+							! isDistractionFree && (
+								<ComplementaryArea.Slot scope="core/edit-site" />
 							)
 						}
 						footer={
 							shouldShowBlockBreadcrumbs && (
 								<BlockBreadcrumb
-									rootLabelText={
-										postWithTemplate &&
-										renderingMode !== 'template-only'
-											? __( 'Page' )
-											: __( 'Template' )
-									}
+									rootLabelText={ postTypeLabel }
 								/>
 							)
 						}

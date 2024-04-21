@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import classNames from 'classnames';
+
+/**
  * WordPress dependencies
  */
 import { Button } from '@wordpress/components';
@@ -10,6 +15,7 @@ import { dateI18n, getDate, getSettings } from '@wordpress/date';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { DataViews } from '@wordpress/dataviews';
+import { privateApis as editorPrivateApis } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -25,28 +31,19 @@ import {
 	LAYOUT_GRID,
 	LAYOUT_TABLE,
 	LAYOUT_LIST,
-	OPERATOR_IN,
-	OPERATOR_NOT_IN,
+	OPERATOR_IS_ANY,
+	OPERATOR_IS_NONE,
 } from '../../utils/constants';
 
-import {
-	trashPostAction,
-	usePermanentlyDeletePostAction,
-	useRestorePostAction,
-	postRevisionsAction,
-	viewPostAction,
-	useEditPostAction,
-} from '../actions';
 import AddNewPageModal from '../add-new-page';
 import Media from '../media';
 import { unlock } from '../../lock-unlock';
 
+const { usePostActions } = unlock( editorPrivateApis );
+
 const { useLocation, useHistory } = unlock( routerPrivateApis );
 
 const EMPTY_ARRAY = [];
-const SUPPORTED_LAYOUTS = window?.__experimentalAdminViews
-	? [ LAYOUT_GRID, LAYOUT_TABLE, LAYOUT_LIST ]
-	: [ LAYOUT_GRID, LAYOUT_TABLE ];
 
 function useView( postType ) {
 	const { params } = useLocation();
@@ -62,6 +59,9 @@ function useView( postType ) {
 			return {
 				...defaultView,
 				type: layout,
+				layout: {
+					...( DEFAULT_CONFIG_PER_VIEW_TYPE[ layout ] || {} ),
+				},
 			};
 		}
 		return defaultView;
@@ -161,32 +161,32 @@ function FeaturedImage( { item, viewType } ) {
 		canvas: 'edit',
 	} );
 	const hasMedia = !! item.featured_media;
+	const size =
+		viewType === LAYOUT_GRID
+			? [ 'large', 'full', 'medium', 'thumbnail' ]
+			: [ 'thumbnail', 'medium', 'large', 'full' ];
+	const media = hasMedia ? (
+		<Media
+			className="edit-site-page-pages__featured-image"
+			id={ item.featured_media }
+			size={ size }
+		/>
+	) : null;
+	if ( viewType === LAYOUT_LIST ) {
+		return media;
+	}
 	return (
-		<span
-			className={ {
+		<button
+			className={ classNames( 'page-pages-preview-field__button', {
 				'edit-site-page-pages__media-wrapper':
 					viewType === LAYOUT_TABLE,
-			} }
+			} ) }
+			type="button"
+			onClick={ onClick }
+			aria-label={ item.title?.rendered || __( '(no title)' ) }
 		>
-			<button
-				className="page-pages-preview-field__button"
-				type="button"
-				onClick={ onClick }
-				aria-label={ item.title?.rendered || __( '(no title)' ) }
-			>
-				{ hasMedia && (
-					<Media
-						className="edit-site-page-pages__featured-image"
-						id={ item.featured_media }
-						size={
-							viewType === LAYOUT_GRID
-								? [ 'large', 'full', 'medium', 'thumbnail' ]
-								: [ 'thumbnail', 'medium', 'large', 'full' ]
-						}
-					/>
-				) }
-			</button>
-		</span>
+			{ media }
+		</button>
 	);
 }
 
@@ -214,18 +214,18 @@ export default function PagePages() {
 		view.filters.forEach( ( filter ) => {
 			if (
 				filter.field === 'status' &&
-				filter.operator === OPERATOR_IN
+				filter.operator === OPERATOR_IS_ANY
 			) {
 				filters.status = filter.value;
 			}
 			if (
 				filter.field === 'author' &&
-				filter.operator === OPERATOR_IN
+				filter.operator === OPERATOR_IS_ANY
 			) {
 				filters.author = filter.value;
 			} else if (
 				filter.field === 'author' &&
-				filter.operator === OPERATOR_NOT_IN
+				filter.operator === OPERATOR_IS_NONE
 			) {
 				filters.author_exclude = filter.value;
 			}
@@ -274,6 +274,7 @@ export default function PagePages() {
 					<FeaturedImage item={ item } viewType={ view.type } />
 				),
 				enableSorting: false,
+				width: '1%',
 			},
 			{
 				header: __( 'Title' ),
@@ -298,7 +299,7 @@ export default function PagePages() {
 							__( '(no title)' )
 					);
 				},
-				maxWidth: 400,
+				maxWidth: 300,
 				enableHiding: false,
 			},
 			{
@@ -322,13 +323,12 @@ export default function PagePages() {
 				elements: STATUSES,
 				enableSorting: false,
 				filterBy: {
-					operators: [ OPERATOR_IN ],
+					operators: [ OPERATOR_IS_ANY ],
 				},
 			},
 			{
 				header: __( 'Date' ),
 				id: 'date',
-				getValue: ( { item } ) => item.date,
 				render: ( { item } ) => {
 					const formattedDate = dateI18n(
 						getSettings().formats.datetimeAbbreviated,
@@ -340,21 +340,20 @@ export default function PagePages() {
 		],
 		[ authors, view.type ]
 	);
-
-	const permanentlyDeletePostAction = usePermanentlyDeletePostAction();
-	const restorePostAction = useRestorePostAction();
-	const editPostAction = useEditPostAction();
-	const actions = useMemo(
-		() => [
-			viewPostAction,
-			trashPostAction,
-			restorePostAction,
-			permanentlyDeletePostAction,
-			editPostAction,
-			postRevisionsAction,
-		],
-		[ permanentlyDeletePostAction, restorePostAction, editPostAction ]
+	const onActionPerformed = useCallback(
+		( actionId, items ) => {
+			if ( actionId === 'edit-post' ) {
+				const post = items[ 0 ];
+				history.push( {
+					postId: post.id,
+					postType: post.type,
+					canvas: 'edit',
+				} );
+			}
+		},
+		[ history ]
 	);
+	const actions = usePostActions( onActionPerformed );
 	const onChangeView = useCallback(
 		( newView ) => {
 			if ( newView.type !== view.type ) {
@@ -372,27 +371,17 @@ export default function PagePages() {
 	);
 
 	const [ showAddPageModal, setShowAddPageModal ] = useState( false );
-	const openModal = useCallback( () => {
-		if ( ! showAddPageModal ) {
-			setShowAddPageModal( true );
-		}
-	}, [ showAddPageModal ] );
-	const closeModal = useCallback( () => {
-		if ( showAddPageModal ) {
-			setShowAddPageModal( false );
-		}
-	}, [ showAddPageModal ] );
-	const handleNewPage = useCallback(
-		( { type, id } ) => {
-			history.push( {
-				postId: id,
-				postType: type,
-				canvas: 'edit',
-			} );
-			closeModal();
-		},
-		[ history ]
-	);
+
+	const openModal = () => setShowAddPageModal( true );
+	const closeModal = () => setShowAddPageModal( false );
+	const handleNewPage = ( { type, id } ) => {
+		history.push( {
+			postId: id,
+			postType: type,
+			canvas: 'edit',
+		} );
+		closeModal();
+	};
 
 	// TODO: we need to handle properly `data={ data || EMPTY_ARRAY }` for when `isLoading`.
 	return (
@@ -421,7 +410,6 @@ export default function PagePages() {
 				view={ view }
 				onChangeView={ onChangeView }
 				onSelectionChange={ onSelectionChange }
-				supportedLayouts={ SUPPORTED_LAYOUTS }
 			/>
 		</Page>
 	);
