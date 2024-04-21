@@ -1,0 +1,29 @@
+name: Update Release Branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: 'release'
+      - name: Set up Git Identity
+        run: |
+          git config --global user.name "Leesa Ward"
+          git config --global user.email "leesa@doubleedesign.com.au"
+      - name: Merge main into release
+        run: |
+          git fetch origin main
+          git merge --no-commit --no-ff --allow-unrelated-histories origin/main
+          git add gutenberg.php
+          git add post-content.php
+          git add build
+          git add lib
+          git add packages
+          git commit -m "Automated update of release branch"
+          git push origin release
